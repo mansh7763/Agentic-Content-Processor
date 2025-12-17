@@ -232,77 +232,6 @@ curl -X POST "http://localhost:8000/followup" \
   -d '{"session_id": "abc123", "response": "I want a summary"}'
 ```
 
-## 🧪 Testing
-
-Run all tests:
-
-```bash
-pytest backend/tests/ -v
-```
-
-Run specific test:
-
-```bash
-pytest backend/tests/test_agent.py::TestSummarization -v
-```
-
-### Sample Test Cases
-
-#### Test Case 1: Audio Transcription + Summary
-
-**Input**: 5-minute audio lecture  
-**Expected**: Transcription + 1-line + bullets + 5-sentence summary + duration
-
-#### Test Case 2: PDF Action Items
-
-**Input**: 3-page meeting notes PDF + "What are the action items?"  
-**Expected**: Extracted text → List of action items
-
-#### Test Case 3: Code OCR + Explanation
-
-**Input**: Screenshot of code + prompt "Explain"  
-**Expected**: OCR → Language detected → Explanation + bugs + complexity
-
-## 📊 Example Outputs
-
-### Summarization Example
-
-```json
-{
-  "one_liner": "AI is revolutionizing healthcare through advanced diagnostics.",
-  "bullets": [
-    "Machine learning improves disease detection accuracy",
-    "AI assists in drug discovery and development",
-    "Personalized treatment plans powered by data analysis"
-  ],
-  "five_sentences": "Artificial intelligence is transforming healthcare..."
-}
-```
-
-### Sentiment Analysis Example
-
-```json
-{
-  "label": "positive",
-  "confidence": 0.92,
-  "justification": "The text expresses enthusiasm and satisfaction with clear positive language."
-}
-```
-
-### Code Explanation Example
-
-```json
-{
-  "explanation": "This function calculates the nth Fibonacci number recursively.",
-  "bugs": [
-    "Exponential time complexity causes performance issues for large n",
-    "No input validation for negative numbers"
-  ],
-  "time_complexity": "O(2^n)",
-  "space_complexity": "O(n)",
-  "language": "python"
-}
-```
 
 ## 🎯 Project Structure
 
@@ -355,39 +284,6 @@ Edit `backend/extractors/audio.py` line 12:
 ```python
 model = whisper.load_model("base")  # Options: tiny, base, small, medium
 ```
-
-## Troubleshooting
-
-### Tesseract not found
-
-```bash
-# Set Tesseract path in backend/extractors/ocr.py
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-```
-
-### Low OCR accuracy
-
-- Use higher quality images
-- Ensure good lighting and contrast
-- Preprocess images (binarization, noise reduction)
-
-### Slow audio transcription
-
-- Use smaller Whisper model (`tiny` or `base`)
-- Process shorter audio clips
-- Consider using cloud APIs for large files
-
-## 📈 Evaluation Rubric
-
-| Criteria            | Points     | Status                                      |
-| ------------------- | ---------- | ------------------------------------------- |
-| Correctness         | 30         | ✅ All tasks produce correct outputs        |
-| Autonomy & Planning | 20         | ✅ Agent plans workflows, uses fallbacks    |
-| Robustness          | 15         | ✅ Error handling, retries, partial results |
-| Explainability      | 10         | ✅ Logs and metadata for each run           |
-| Code Quality        | 10         | ✅ Modular, clean, tested                   |
-| UX & Demo           | 10         | ✅ Clean UI, demo ready                     |
-| **Total**           | **95/100** | **Exceeds minimum (75)**                    |
 
 ## Key Design Decisions
 
