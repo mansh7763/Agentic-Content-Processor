@@ -1,10 +1,9 @@
 import streamlit as st
 import requests
 
-# Configure page
 st.set_page_config(
     page_title="Agentic Content Processor",
-    page_icon="🤖",
+    page_icon="",
     layout="wide"
 )
 
@@ -29,7 +28,7 @@ def display_result(result: dict, task: str):
         return
 
     if task == "summarize":
-        st.subheader("📝 Summary")
+        st.subheader("Summary")
         st.markdown("**One-Liner:**")
         st.info(result.get("one_liner", ""))
         st.markdown("**Key Points:**")
@@ -38,17 +37,16 @@ def display_result(result: dict, task: str):
         st.markdown("**Detailed Summary:**")
         st.write(result.get("five_sentences", ""))
     elif task == "sentiment":
-        st.subheader("😊 Sentiment Analysis")
+        st.subheader("Sentiment analysis")
         label = result.get("label", "neutral")
         confidence = result.get("confidence", 0)
-        color_map = {"positive": "🟢", "negative": "🔴", "neutral": "🟡"}
-        st.markdown(f"{color_map.get(label, '⚪')} **Sentiment:** {label.upper()}")
+        st.markdown(f"**Sentiment:** {label.upper()}")
         st.progress(confidence)
         st.caption(f"Confidence: {confidence:.0%}")
         st.markdown("**Justification:**")
         st.write(result.get("justification", ""))
     elif task == "code_explain":
-        st.subheader("💻 Code Explanation")
+        st.subheader("Code explanation")
         if result.get("language"):
             st.badge(f"Language: {result['language']}")
         st.markdown("**Explanation:**")
@@ -63,7 +61,7 @@ def display_result(result: dict, task: str):
         with col2:
             st.metric("Space", result.get("space_complexity", "N/A"))
     elif task == "extract":
-        st.subheader("📌 Extracted Information")
+        st.subheader("Extracted information")
         action_items = result.get("action_items", [])
         if action_items:
             st.markdown(f"**Found {len(action_items)} action items:**")
@@ -72,14 +70,14 @@ def display_result(result: dict, task: str):
         else:
             st.info("No specific action items found")
     elif task == "qa":
-        st.subheader("💬 Answer")
+        st.subheader("Answer")
         st.write(result.get("answer", ""))
     else:
         st.json(result)
 
 
 def handle_followup(response_text: str):
-    with st.spinner("🤔 Processing your response..."):
+    with st.spinner("Processing your response..."):
         try:
             response = requests.post(
                 f"{API_URL}/followup",
@@ -96,16 +94,16 @@ def handle_followup(response_text: str):
                 })
                 st.session_state.messages.append({
                     "role": "assistant",
-                    "content": "✅ Done!",
+                    "content": "Completed.",
                     "result": data["result"],
                     "task": data.get("task")
                 })
                 st.session_state.awaiting_followup = False
                 st.session_state.session_id = None
             else:
-                st.error(f"❌ Error: {response.text}")
+                st.error(f"Error: {response.text}")
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+            st.error(f"Error: {str(e)}")
     st.rerun()
 
 
@@ -122,10 +120,10 @@ def process_input(text: str, file):
     elif file:
         st.session_state.messages.append({
             "role": "user",
-            "content": f"📎 Uploaded: {file.name}"
+            "content": f"Uploaded file: {file.name}"
         })
 
-    with st.spinner("🤔 Processing..."):
+    with st.spinner("Processing..."):
         try:
             if file:
                 files = {"file": (file.name, file.getvalue(), file.type)}
@@ -143,72 +141,71 @@ def process_input(text: str, file):
                     st.session_state.awaiting_followup = True
                     st.session_state.messages.append({
                         "role": "assistant",
-                        "content": f"❓ {data['question']}",
+                        "content": data['question'],
                         "extracted_text": data.get("extracted_text", ""),
                         "metadata": data.get("metadata", {})
                     })
                 else:
                     st.session_state.messages.append({
                         "role": "assistant",
-                        "content": "✅ Done!",
+                        "content": "Completed.",
                         "result": data["result"],
                         "task": data.get("task"),
                         "extracted_text": data.get("extracted_text", ""),
                         "metadata": data.get("metadata", {})
                     })
             else:
-                st.error(f"❌ Error: {response.text}")
+                st.error(f"Error: {response.text}")
 
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+            st.error(f"Error: {str(e)}")
 
     st.rerun()
 
-# Title
 st.title("Agentic Content Processor")
-st.markdown("Upload files or enter text - the AI agent will understand your intent and perform the right task!")
+st.markdown(
+    "Upload a document, image, audio file, or paste text, and the agent will extract the content and help you summarize, analyze, or ask questions."
+)
 
-# Sidebar
 with st.sidebar:
-    st.header("📋 Supported Tasks")
+    st.header("Supported tasks")
     st.markdown("""
-    - ✅ **Summarization** (1-liner, bullets, 5 sentences)
-    - 😊 **Sentiment Analysis** (with confidence)
-    - 💻 **Code Explanation** (bugs & complexity)
-    - 📝 **Text Extraction** (OCR from images)
-    - 🎥 **YouTube Transcripts**
-    - 📄 **PDF Processing**
-    - 🎵 **Audio Transcription**
-    - ❓ **Q&A** (conversational)
-    - 📌 **Action Item Extraction**
+    - **Summarization** (short and detailed summaries)
+    - **Sentiment analysis** (with confidence)
+    - **Code explanation** (issues and complexity)
+    - **Text extraction** (OCR from images)
+    - **YouTube transcripts**
+    - **PDF processing**
+    - **Audio transcription**
+    - **Question answering** (conversational)
+    - **Action item extraction**
     """)
     
-    st.header("📁 Supported Files")
+    st.header("Supported file types")
     st.markdown("""
     - **Images**: JPG, PNG
     - **PDFs**: Text or Scanned
     - **Audio**: MP3, WAV, M4A
     """)
     
-    if st.button("🔄 Clear Chat"):
+    if st.button("Clear conversation"):
         st.session_state.messages = []
         st.session_state.session_id = None
         st.session_state.awaiting_followup = False
         st.rerun()
 
-# Main content area
-st.header("💬 Chat Interface")
+st.header("Conversation")
 
 # Display chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["role"] == "assistant":
             if "extracted_text" in message:
-                with st.expander("📄 Extracted Content"):
+                with st.expander("Extracted content"):
                     st.text(message["extracted_text"])
             
             if "metadata" in message:
-                with st.expander("ℹ️ Metadata"):
+                with st.expander("Metadata"):
                     st.json(message["metadata"])
             
             if "result" in message:
@@ -218,31 +215,28 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-# Input section
 col1, col2 = st.columns([3, 1])
 
 with col1:
     text_input = st.text_input(
-        "Enter text or question:",
+        "Enter text, a question, or a URL:",
         key="text_input",
         placeholder="Type your message or question here..."
     )
 
 with col2:
     uploaded_file = st.file_uploader(
-        "Or upload a file:",
+        "Or upload a file",
         type=['jpg', 'jpeg', 'png', 'pdf', 'mp3', 'wav', 'm4a'],
         key="file_upload"
     )
 
-# Process button
-if st.button("🚀 Process", type="primary"):
+if st.button("Run", type="primary"):
     if text_input or uploaded_file:
         process_input(text_input, uploaded_file)
     else:
-        st.warning("⚠️ Please enter text or upload a file!")
+        st.warning("Please enter text or upload a file.")
 
 
-# Footer
 st.markdown("---")
-st.caption("🤖 Powered by LangGraph + Groq + Open Source Models")
+st.caption("Powered by LangGraph, Groq, and open-source models")
